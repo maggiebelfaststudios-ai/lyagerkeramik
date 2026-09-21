@@ -1,0 +1,122 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Monograph palette as RGB channels so Tailwind opacity modifiers work. */
+  --paper: 243 239 231;
+  --surface: 255 255 255;
+  --ink: 20 19 15;
+  --muted: 111 106 96;
+  --line: 221 214 201;
+}
+
+@layer base {
+  html {
+    background: rgb(var(--paper));
+    color: rgb(var(--ink));
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    font-family: var(--font-serif), Georgia, serif;
+    /* Print-scale body. Smaller than the trendy web default. */
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  ::selection {
+    background: rgb(var(--ink));
+    color: rgb(var(--paper));
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* Neutral image placeholder — no pulsing skeletons. */
+  img,
+  video {
+    background-color: rgb(var(--line));
+  }
+}
+
+/* Circular loading spinner shown over a photo until it loads. The parent must
+   be position:relative. */
+.spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
+  border: 3px solid rgb(var(--line));
+  border-top-color: rgb(var(--muted));
+  border-radius: 9999px;
+  animation: spin 0.7s linear infinite;
+  pointer-events: none;
+  z-index: 2;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Photo crop wrapper is a positioning context on every screen size. */
+.mobile-crop {
+  position: relative;
+}
+
+@layer components {
+  /* White text with a crisp 1px black outline — legible over photos. */
+  .text-outline {
+    color: #fff;
+    text-shadow:
+      -1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000,
+      -1px 0 0 #000, 1px 0 0 #000,
+      -1px 1px 0 #000, 0 1px 0 #000, 1px 1px 0 #000;
+  }
+}
+
+/* Mobile main-page feed: crop every photo to a locked tall (phone-shaped)
+   portrait. The per-photo crop rectangle is applied via --cw/--ch/--cl/--ct
+   (see src/lib/crop.ts). Desktop is untouched. */
+/* Desktop feed: independent membership + order. */
+@media (min-width: 769px) {
+  .home-feed > figure {
+    order: var(--do, 0);
+  }
+  .home-feed > figure:not(.on-desktop) {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Mobile feed: independent membership + order. */
+  .home-feed > figure {
+    order: var(--mo, 0);
+  }
+  .home-feed > figure:not(.on-mobile) {
+    display: none;
+  }
+  .mobile-crop {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 9 / 19.5;
+    overflow: hidden;
+  }
+  .mobile-crop > img,
+  .mobile-crop > video {
+    position: absolute !important;
+    left: var(--cl, 0);
+    top: var(--ct, 0);
+    width: var(--cw, 100%) !important;
+    height: var(--ch, 100%) !important;
+    max-width: none !important;
+    object-fit: fill;
+  }
+}
