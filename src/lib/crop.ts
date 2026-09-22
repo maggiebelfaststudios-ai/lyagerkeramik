@@ -60,6 +60,15 @@ export function cropVars(c: Crop): Record<string, string> {
   };
 }
 
+// `object-position` that keeps a stored crop in view when the item is shown
+// with object-fit: cover (the Info page background). Exact on phones, where the
+// screen has roughly the crop's shape. Elsewhere it follows the same framing.
+export function cropObjectPosition(c: Crop): string {
+  const axis = (offset: number, size: number) =>
+    size >= 100 ? 50 : Math.min(100, Math.max(0, (offset / (100 - size)) * 100));
+  return `${axis(c.x, c.w)}% ${axis(c.y, c.h)}%`;
+}
+
 // Responsive `sizes` so a zoomed-in crop still pulls a sharp source on mobile.
 export function cropSizes(c: Crop): string {
   const mobileVw = Math.min(320, Math.round(100 / (c.w / 100)));

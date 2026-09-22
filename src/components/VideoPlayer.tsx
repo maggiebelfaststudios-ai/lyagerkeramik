@@ -17,14 +17,19 @@ type Video = Pick<
 export default function VideoPlayer({
   video,
   className,
+  style,
   eager = false,
+  sound = true,
   soundClassName = "absolute bottom-3 right-3",
   onReady,
 }: {
   video: Video;
   className?: string;
+  style?: React.CSSProperties;
   // Start loading straight away (first item on the page, the lightbox).
   eager?: boolean;
+  // Offer the sound button (when the clip has sound). Off for backgrounds.
+  sound?: boolean;
   soundClassName?: string;
   onReady?: () => void;
 }) {
@@ -52,12 +57,19 @@ export default function VideoPlayer({
     el.muted = true;
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
+    // "On screen" means filling at least a quarter of the screen's height (or a
+    // quarter of the video, if it's shorter than that). Not a share of the
+    // video's own area: in the mobile crop most of a landscape clip is cut off,
+    // so a quarter of it may never be visible at once.
     const io = new IntersectionObserver(
       ([entry]) => {
-        if (entry.intersectionRatio >= 0.25) el.play().catch(() => {});
-        else el.pause();
+        const screen = entry.rootBounds?.height ?? window.innerHeight;
+        const needed = Math.min(entry.boundingClientRect.height, screen) * 0.25;
+        if (entry.isIntersecting && entry.intersectionRect.height >= needed) {
+          el.play().catch(() => {});
+        } else el.pause();
       },
-      { threshold: [0, 0.25] },
+      { threshold: Array.from({ length: 21 }, (_, i) => i / 20) },
     );
     io.observe(el);
     return () => io.disconnect();
@@ -90,9 +102,9 @@ export default function VideoPlayer({
           if (e.currentTarget.paused) e.currentTarget.play().catch(() => {});
         }}
         className={className}
-        style={{ aspectRatio: `${width} / ${height}` }}
+        style={{ aspectRatio: `${width} / ${height}`, ...style }}
       />
-      {video.has_audio && (
+      {sound && video.has_audio && (
         <button
           type="button"
           onClick={toggleSound}

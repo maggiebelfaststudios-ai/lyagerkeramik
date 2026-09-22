@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminPage() {
   const supabase = await createClient();
 
-  const [{ data: photos }, { data: folders }] = await Promise.all([
+  const [{ data: photos }, { data: folders }, settings] = await Promise.all([
     supabase
       .from("photos")
       .select("*")
@@ -17,12 +17,21 @@ export default async function AdminPage() {
       .from("folders")
       .select("*")
       .order("display_order", { ascending: true }),
+    supabase
+      .from("site_settings")
+      .select("info_background_id")
+      .eq("id", 1)
+      .maybeSingle(),
   ]);
 
   return (
     <AdminApp
       photos={(photos as Photo[]) ?? []}
       folders={(folders as Folder[]) ?? []}
+      // undefined: the settings table doesn't exist yet (migration 0007).
+      infoBackgroundId={
+        settings.error ? undefined : (settings.data?.info_background_id ?? null)
+      }
     />
   );
 }

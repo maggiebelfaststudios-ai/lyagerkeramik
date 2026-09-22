@@ -82,6 +82,23 @@
   }
 }
 
+/* A page with a full-screen background (see PageBackdrop): the header and
+   footer get the same white-with-outline treatment as over the main page. */
+body:has(.page-backdrop) header,
+body:has(.page-backdrop) header *,
+body:has(.page-backdrop) footer,
+body:has(.page-backdrop) footer * {
+  color: #fff;
+  text-shadow:
+    -1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000,
+    -1px 0 0 #000, 1px 0 0 #000,
+    -1px 1px 0 #000, 0 1px 0 #000, 1px 1px 0 #000;
+}
+body:has(.page-backdrop) header a:hover {
+  color: #fff;
+  opacity: 0.75;
+}
+
 /* Mobile main-page feed: crop every photo to a locked tall (phone-shaped)
    portrait. The per-photo crop rectangle is applied via --cw/--ch/--cl/--ct
    (see src/lib/crop.ts). Desktop is untouched. */

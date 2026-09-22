@@ -5,21 +5,30 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import LibrarySidebar from "./LibrarySidebar";
 import FeedCanvas from "./FeedCanvas";
+import InfoBackgroundCanvas from "./InfoBackgroundCanvas";
 import PhotoEditorModal from "./PhotoEditorModal";
 import SignOutButton from "./SignOutButton";
 import type { Photo, Folder } from "@/lib/types";
 
-type Feed = "desktop" | "mobile";
+type Tab = "desktop" | "mobile" | "info";
+
+const TAB_LABELS: Record<Tab, string> = {
+  desktop: "Desktop main page",
+  mobile: "Mobile main page",
+  info: "Info page",
+};
 
 export default function AdminApp({
   photos,
   folders,
+  infoBackgroundId,
 }: {
   photos: Photo[];
   folders: Folder[];
+  infoBackgroundId: string | null | undefined; // undefined: not set up yet
 }) {
   const router = useRouter();
-  const [feed, setFeed] = useState<Feed>("desktop");
+  const [feed, setFeed] = useState<Tab>("desktop");
   const [editing, setEditing] = useState<Photo | null>(null);
 
   const refresh = () => router.refresh();
@@ -58,7 +67,7 @@ export default function AdminApp({
 
         <main className="flex min-w-0 flex-1 flex-col">
           <nav className="flex gap-1 border-b border-line px-5">
-            {(["desktop", "mobile"] as Feed[]).map((f) => (
+            {(["desktop", "mobile", "info"] as Tab[]).map((f) => (
               <button
                 key={f}
                 onClick={() => setFeed(f)}
@@ -68,19 +77,28 @@ export default function AdminApp({
                     : "border-transparent text-muted hover:text-ink"
                 }`}
               >
-                {f === "desktop" ? "Desktop main page" : "Mobile main page"}
+                {TAB_LABELS[f]}
               </button>
             ))}
           </nav>
 
           <div className="min-h-0 flex-1 overflow-y-auto p-5">
-            <FeedCanvas
-              key={feed}
-              feed={feed}
-              items={feed === "desktop" ? desktopItems : mobileItems}
-              onChanged={refresh}
-              onEdit={setEditing}
-            />
+            {feed === "info" ? (
+              <InfoBackgroundCanvas
+                current={photos.find((p) => p.id === infoBackgroundId) ?? null}
+                ready={infoBackgroundId !== undefined}
+                onChanged={refresh}
+                onEdit={setEditing}
+              />
+            ) : (
+              <FeedCanvas
+                key={feed}
+                feed={feed}
+                items={feed === "desktop" ? desktopItems : mobileItems}
+                onChanged={refresh}
+                onEdit={setEditing}
+              />
+            )}
           </div>
         </main>
       </div>

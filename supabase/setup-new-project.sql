@@ -87,3 +87,15 @@ alter table public.photos
 
 alter table public.photos
   add constraint photos_media_type_check check (media_type in ('image', 'video'));
+
+-- ── 0007: site settings (Info page background) ─────────────────────────────
+create table public.site_settings (
+  id                 int primary key default 1 check (id = 1),
+  info_background_id uuid references public.photos(id) on delete set null
+);
+insert into public.site_settings (id) values (1);
+alter table public.site_settings enable row level security;
+create policy "site_settings public read" on public.site_settings for select
+  using (true);
+create policy "site_settings authenticated write" on public.site_settings for all
+  to authenticated using (true) with check (true);

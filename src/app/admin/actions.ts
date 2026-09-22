@@ -161,6 +161,17 @@ export async function reorderMobile(orderedIds: string[]) {
   revalidatePublic();
 }
 
+// ── info page ───────────────────────────────────────────────────────────────
+// The Info page background: a photo or video from the library, or null.
+export async function setInfoBackground(photoId: string | null) {
+  const supabase = await requireUser();
+  const { error } = await supabase
+    .from("site_settings")
+    .upsert({ id: 1, info_background_id: photoId });
+  if (error) throw new Error(error.message);
+  revalidatePublic();
+}
+
 // ── folders ─────────────────────────────────────────────────────────────────
 export async function createFolder(name: string) {
   const supabase = await requireUser();
