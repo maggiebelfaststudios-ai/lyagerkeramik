@@ -54,6 +54,7 @@ export default async function InfoPage() {
             +45 50 96 92 17
           </a>
         </p>
+        <p>@lyagerkeramik</p>
       </div>
     </div>
   );
